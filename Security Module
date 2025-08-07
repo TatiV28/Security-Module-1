@@ -1,0 +1,28 @@
+from functools import wraps
+from flask import Response
+import re
+
+def secure_headers(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        response = f(*args, **kwargs)
+        if isinstance(response, Response):
+            response.headers['Content-Security-Policy'] = "default-src 'self'"
+            response.headers['X-Content-Type-Options'] = 'nosniff'
+            response.headers['X-Frame-Options'] = 'DENY'
+            response.headers['X-XSS-Protection'] = '1; mode=block'
+        return response
+    return decorated_function
+
+def validate_input(data):
+    if not isinstance(data, dict):
+        return False
+    # Simple input validation
+    for key, value in data.items():
+        if not isinstance(key, str) or not isinstance(value, (int, float, str)):
+            return False
+        if isinstance(value, str):
+            # Prevent XSS and SQL injection
+            if re.search(r'[<>{}]|script|select|union|insert|delete', value, re.I):
+                return False
+    return True
