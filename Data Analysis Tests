@@ -1,0 +1,12 @@
+import pytest
+from app.data_analysis import analyze_data
+
+def test_analyze_data():
+    data = {
+        'value1': [1, 2, 3],
+        'value2': [4, 5, 6]
+    }
+    result = analyze_data(data)
+    assert 'mean' in result
+    assert result['count'] == 3
+    assert result['mean']['value1'] == 2.0
